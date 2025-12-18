@@ -1,0 +1,8 @@
+aiohttp==3.9.5
+aiodns==3.0.0
+cchardet==2.1.7
+aiofiles==25.1.0
+beautifulsoup4==4.14.3
+aiosqlite==0.21.0
+PyYAML==6.0.3
+lxml==6.0.2

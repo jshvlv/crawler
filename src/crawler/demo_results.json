@@ -1,0 +1,22 @@
+{
+  "summary": [
+    {
+      "url": "https://petstore.swagger.io",
+      "title": "Swagger UI",
+      "text_length": 10,
+      "text": "Swagger UI",
+      "links_count": 0,
+      "images_count": 0,
+      "depth": 0
+    }
+  ],
+  "stats": {
+    "queued": 0,
+    "processed": 1,
+    "failed": 0,
+    "total": 1,
+    "processed_urls": 1,
+    "failed_urls": 0
+  },
+  "failed": {}
+}

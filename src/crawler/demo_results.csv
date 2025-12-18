@@ -1,0 +1,2 @@
+url,title,text,links,metadata,images,headings,tables,lists,status_code,crawled_at,content_type
+https://petstore.swagger.io,Swagger UI,Swagger UI,[],"{""title"": ""Swagger UI"", ""description"": """", ""keywords"": """"}",[],"{""h1"": [], ""h2"": [], ""h3"": []}",[],"{""ul"": [], ""ol"": []}",200,2025-12-15T21:24:59.307676,text/html

@@ -1,0 +1,62 @@
+# Пример конфигурационного файла для AsyncCrawler
+
+# Настройки краулера
+crawler:
+  max_concurrent: 5              # Максимальное количество одновременных запросов
+  max_depth: 2                    # Максимальная глубина обхода
+  max_pages: 50                   # Максимальное количество страниц
+  same_domain_only: true          # Обрабатывать только URL того же домена
+  verify_ssl: false               # Проверять SSL сертификаты
+  per_domain_limit: 2             # Максимум запросов к одному домену одновременно
+  requests_per_second: 2.0        # Лимит запросов в секунду
+  min_delay: 0.5                  # Минимальная задержка между запросами (сек)
+  jitter: 0.1                     # Случайная добавка к задержке (сек)
+  respect_robots: true            # Соблюдать robots.txt
+  user_agent: "AsyncCrawler/1.0"  # User-Agent для запросов
+  retry_max_retries: 3            # Максимум повторов для временных ошибок
+  retry_backoff_factor: 2.0      # Множитель backoff между попытками
+  retry_base_delay: 0.5           # Базовая задержка перед повтором (сек)
+  connect_timeout: 5.0            # Таймаут подключения (сек)
+  read_timeout: 10.0              # Таймаут чтения (сек)
+  total_timeout: 15.0             # Общий таймаут (сек)
+  circuit_breaker_threshold: 5    # Количество ошибок до блокировки домена
+  circuit_breaker_cooldown: 30.0  # Время блокировки домена (сек)
+
+# URL для обхода
+urls:
+  start_urls:                     # Стартовые URL
+    - "https://example.com"
+  sitemap_urls: []                 # Явно указанные sitemap URL (опционально)
+  use_sitemap: true               # Использовать sitemap.xml для обнаружения URL
+
+# Фильтры URL
+filters:
+  exclude_patterns:               # Паттерны для исключения URL (regex)
+    - "\.pdf$"                    # Исключить PDF файлы
+    - "/admin/"                   # Исключить админ-панель
+  include_patterns: []            # Паттерны для включения URL (если указаны, только они обрабатываются)
+
+# Настройки сохранения данных
+storage:
+  type: "json"                    # Тип хранилища: json, csv, sqlite, или none
+  json:
+    filename: "results.json"       # Имя файла для JSON
+    buffer_size: 10                # Размер буфера перед записью
+  csv:
+    filename: "results.csv"         # Имя файла для CSV
+    buffer_size: 10
+  sqlite:
+    filename: "results.db"          # Имя файла для SQLite
+    batch_size: 50                 # Размер batch для вставки
+
+# Настройки логирования
+logging:
+  level: "INFO"                    # Уровень: DEBUG, INFO, WARNING, ERROR
+  file: "crawler.log"              # Файл для логов (null = только консоль)
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Настройки экспорта статистики
+output:
+  stats_json: "stats.json"         # Файл для экспорта статистики в JSON
+  stats_html: "report.html"       # Файл для HTML отчёта
+
