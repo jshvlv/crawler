@@ -1,13 +1,3 @@
-"""
-Загрузка конфигурации краулера из YAML файла.
-
-Поддерживает настройки:
-- Параметры краулера (max_concurrent, rate_limit, etc.)
-- Стартовые URL
-- Фильтры и исключения
-- Настройки сохранения данных
-- Настройки логирования
-"""
 import logging
 import os
 from typing import Any, Dict, List, Optional
@@ -18,14 +8,6 @@ logger = logging.getLogger(__name__)
 
 
 class ConfigLoader:
-    """
-    Загрузчик конфигурации из YAML файла.
-    
-    Поддерживает:
-    - Загрузку из файла
-    - Валидацию параметров
-    - Значения по умолчанию
-    """
     
     DEFAULT_CONFIG = {
         "crawler": {
@@ -59,7 +41,7 @@ class ConfigLoader:
             "include_patterns": [],
         },
         "storage": {
-            "type": "json",  # json, csv, sqlite, или null
+            "type": "json",                               
             "json": {
                 "filename": "results.json",
                 "buffer_size": 10,
@@ -74,8 +56,8 @@ class ConfigLoader:
             },
         },
         "logging": {
-            "level": "INFO",  # DEBUG, INFO, WARNING, ERROR
-            "file": None,  # Путь к файлу логов (None = только консоль)
+            "level": "INFO",                               
+            "file": None,                                              
             "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         },
         "output": {
@@ -86,19 +68,6 @@ class ConfigLoader:
     
     @staticmethod
     def load_from_file(path: str) -> Dict[str, Any]:
-        """
-        Загружает конфигурацию из YAML файла.
-        
-        Args:
-            path: Путь к YAML файлу
-        
-        Returns:
-            Словарь с конфигурацией (объединённой с значениями по умолчанию)
-        
-        Raises:
-            FileNotFoundError: Если файл не найден
-            yaml.YAMLError: Если файл содержит невалидный YAML
-        """
         if not os.path.exists(path):
             raise FileNotFoundError(f"Config file not found: {path}")
         
@@ -108,7 +77,7 @@ class ConfigLoader:
         except yaml.YAMLError as e:
             raise yaml.YAMLError(f"Error parsing YAML config: {e}")
         
-        # Объединяем с конфигурацией по умолчанию
+                                                 
         config = ConfigLoader._merge_config(ConfigLoader.DEFAULT_CONFIG.copy(), user_config)
         
         logger.info(f"Config loaded from {path}")
@@ -116,36 +85,20 @@ class ConfigLoader:
     
     @staticmethod
     def _merge_config(default: Dict, user: Dict) -> Dict:
-        """
-        Рекурсивно объединяет пользовательскую конфигурацию с конфигурацией по умолчанию.
-        
-        Args:
-            default: Конфигурация по умолчанию
-            user: Пользовательская конфигурация
-        
-        Returns:
-            Объединённая конфигурация
-        """
         result = default.copy()
         
         for key, value in user.items():
             if key in result and isinstance(result[key], dict) and isinstance(value, dict):
-                # Рекурсивно объединяем вложенные словари
+                                                         
                 result[key] = ConfigLoader._merge_config(result[key], value)
             else:
-                # Перезаписываем значение
+                                         
                 result[key] = value
         
         return result
     
     @staticmethod
     def create_example_config(filename: str = "config.example.yaml") -> None:
-        """
-        Создаёт пример конфигурационного файла.
-        
-        Args:
-            filename: Имя файла для создания
-        """
         example_config = {
             "crawler": {
                 "max_concurrent": 5,

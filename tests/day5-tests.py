@@ -1,12 +1,3 @@
-"""
-Тесты для Дня 5: обработка ошибок и повторы с backoff.
-
-Проверяем:
-- Повторы при TransientError с успешным завершением
-- Отсутствие повторов при PermanentError
-- Экспоненциальный backoff (по количеству задержек)
-- Circuit breaker (открывается после порога)
-"""
 import asyncio
 import time
 
@@ -15,7 +6,6 @@ from crawler.fetcher import AsyncCrawler
 
 
 async def test_retry_transient_success():
-    """TransientError повторяется и в итоге завершается успехом."""
     attempts = {"count": 0}
 
     async def flaky(attempt: int):
@@ -33,7 +23,6 @@ async def test_retry_transient_success():
 
 
 async def test_no_retry_on_permanent():
-    """PermanentError не повторяется."""
     attempts = {"count": 0}
 
     async def always_fail(attempt: int):
@@ -56,7 +45,6 @@ async def test_no_retry_on_permanent():
 
 
 async def test_backoff_delays_count():
-    """Проверяем, что накапливаются задержки (экспоненциальный рост числа задержек)."""
     async def fail_all(attempt: int):
         raise TransientError("always")
 
@@ -68,16 +56,15 @@ async def test_backoff_delays_count():
     else:
         assert False, "Should raise after exhausting retries"
 
-    # Должны быть записи задержек по количеству повторов (max_retries)
+                                                                      
     assert len(retry.retry_delays) == retry.max_retries, "Backoff delays should be recorded for each retry"
-    # Проверяем экспоненциальный рост (каждая следующая >= предыдущей)
+                                                                      
     for prev, nxt in zip(retry.retry_delays, retry.retry_delays[1:]):
         assert nxt >= prev, "Backoff delays should be non-decreasing"
     print("PASS: backoff delays recorded and non-decreasing")
 
 
 async def test_circuit_breaker_opens():
-    """Проверяем открытие circuit breaker после порога ошибок."""
     crawler = AsyncCrawler(
         max_concurrent=1,
         respect_robots=False,

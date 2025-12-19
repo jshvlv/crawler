@@ -1,13 +1,3 @@
-"""
-Тесты для Дня 7: Продвинутые возможности и финальная интеграция.
-
-Проверяет:
-- SitemapParser
-- CrawlerStats
-- ConfigLoader
-- AdvancedCrawler
-- CLI интерфейс
-"""
 import asyncio
 import os
 import tempfile
@@ -20,12 +10,9 @@ from crawler.advanced_crawler import AdvancedCrawler
 
 
 async def test_sitemap_parser():
-    """
-    Тест: SitemapParser корректно парсит sitemap XML.
-    """
     print("\n=== Test: Sitemap Parser ===")
     
-    # Подготовим фейковый ответ с нужными методами
+                                                  
     xml_text = """<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
@@ -56,7 +43,7 @@ async def test_sitemap_parser():
                 raise Exception(f"HTTP {self.status}")
 
     class FakeSession:
-        def get(self, url):  # внимание: НЕ async def
+        def get(self, url):                          
             return FakeResponse(xml_text, status=200)
 
     session = FakeSession()
@@ -76,15 +63,12 @@ async def test_sitemap_parser():
 
 
 async def test_crawler_stats():
-    """
-    Тест: CrawlerStats корректно собирает и экспортирует статистику.
-    """
     print("\n=== Test: Crawler Stats ===")
     
     stats = CrawlerStats()
     stats.start()
     
-    # Добавляем данные
+                      
     stats.add_page("https://example.com/page1", "success", 0.5)
     stats.add_status_code(200)
     stats.add_page("https://example.com/page2", "success", 0.3)
@@ -94,7 +78,7 @@ async def test_crawler_stats():
     
     stats.stop()
     
-    # Проверяем статистику
+                          
     result = stats.get_stats()
     assert result["total_pages"] == 3
     assert result["successful"] == 2
@@ -103,7 +87,7 @@ async def test_crawler_stats():
     assert result["status_codes"][404] == 1
     assert result["performance"]["elapsed_time"] > 0
     
-    # Тестируем экспорт
+                       
     with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
         json_file = f.name
     
@@ -116,18 +100,18 @@ async def test_crawler_stats():
             os.remove(json_file)
         raise
     
-    # Тестируем HTML экспорт
+                            
     with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.html') as f:
         html_file = f.name
     
     try:
         stats.export_to_html_report(html_file)
         assert os.path.exists(html_file), "HTML file should be created"
-        # Проверяем, что файл содержит нужные данные
+                                                    
         with open(html_file, 'r', encoding='utf-8') as f:
             content = f.read()
             assert "Общая статистика" in content
-            assert "3" in content  # total_pages
+            assert "3" in content               
         os.remove(html_file)
     except Exception:
         if os.path.exists(html_file):
@@ -138,12 +122,9 @@ async def test_crawler_stats():
 
 
 async def test_config_loader():
-    """
-    Тест: ConfigLoader корректно загружает и объединяет конфигурацию.
-    """
     print("\n=== Test: Config Loader ===")
     
-    # Создаём временный конфигурационный файл
+                                             
     with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.yaml') as f:
         f.write("""
 crawler:
@@ -162,7 +143,7 @@ urls:
         assert config["crawler"]["max_concurrent"] == 5
         assert config["crawler"]["max_depth"] == 2
         assert config["urls"]["start_urls"] == ["https://example.com"]
-        # Проверяем, что значения по умолчанию тоже присутствуют
+                                                                
         assert "max_pages" in config["crawler"]
         
         os.remove(config_file)
@@ -175,12 +156,9 @@ urls:
 
 
 async def test_advanced_crawler_init():
-    """
-    Тест: AdvancedCrawler корректно инициализируется.
-    """
     print("\n=== Test: Advanced Crawler Init ===")
     
-    # Создаём минимальную конфигурацию
+                                      
     config = {
         "crawler": {
             "max_concurrent": 2,
@@ -208,12 +186,9 @@ async def test_advanced_crawler_init():
 
 
 async def test_advanced_crawler_from_config():
-    """
-    Тест: AdvancedCrawler.from_config корректно загружает конфигурацию.
-    """
     print("\n=== Test: Advanced Crawler From Config ===")
     
-    # Создаём временный конфигурационный файл
+                                             
     with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.yaml') as f:
         f.write("""
 crawler:
@@ -246,9 +221,6 @@ storage:
 
 
 async def main():
-    """
-    Запускает все тесты для Дня 7.
-    """
     print("=== Running Day 7 Tests ===")
     
     await test_sitemap_parser()

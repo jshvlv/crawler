@@ -38,10 +38,10 @@ async def test_valid_html_parse():
 
 
 async def test_broken_html_returns_partial():
-    html = "<html><head><title>Oops"  # сломанный HTML
+    html = "<html><head><title>Oops"                  
     parser = HTMLParser()
     result = await parser.parse_html(html, "https://example.com")
-    # Должен не падать и вернуть хотя бы url и title
+                                                    
     assert result["url"] == "https://example.com"
     assert "error" not in result
     assert result["title"] == "Oops"
@@ -78,7 +78,7 @@ async def test_images_with_alt_and_absolute_src():
 
     assert {"src": "https://example.com/img1.png", "alt": "one"} in images
     assert {"src": "https://cdn.com/img2.png", "alt": "two"} in images
-    # пустой src отфильтрован
+                             
     assert all(img["src"] for img in images)
 
 

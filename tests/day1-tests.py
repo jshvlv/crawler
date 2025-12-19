@@ -49,14 +49,14 @@ async def test_parallel_vs_sequential():
         "https://httpbin.org/delay/2",
     ]
 
-    # последовательная работа
+                             
     crawler_seq = AsyncCrawler(max_concurrent=1)
     start = time.time()
     await crawler_seq.fetch_urls(urls)
     seq_time = time.time() - start
     await crawler_seq.close()
 
-    # параллельная работа
+                         
     crawler_par = AsyncCrawler(max_concurrent=3)
     start = time.time()
     await crawler_par.fetch_urls(urls)

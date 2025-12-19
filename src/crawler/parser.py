@@ -10,10 +10,6 @@ logger = logging.getLogger("HTMLParser")
 
 class HTMLParser:
     async def parse_html(self, html: str, url: str) -> Dict:
-        """
-        Разбор HTML с извлечением ключевых данных.
-        Возвращает частичные результаты даже при ошибках парсинга.
-        """
         try:
             soup = BeautifulSoup(html, "lxml", parse_only=SoupStrainer(True))
         except Exception as e:

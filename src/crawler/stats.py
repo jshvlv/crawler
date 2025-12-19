@@ -1,14 +1,3 @@
-"""
-Расширенная статистика краулера с экспортом в JSON и HTML.
-
-Ведёт статистику:
-- Общее количество обработанных страниц
-- Успешные/неудачные запросы
-- Средняя скорость обработки
-- Распределение по статус-кодам
-- Топ доменов по количеству страниц
-- Время работы краулера
-"""
 import json
 import logging
 import time
@@ -21,69 +10,47 @@ logger = logging.getLogger(__name__)
 
 
 class CrawlerStats:
-    """
-    Класс для сбора и анализа статистики краулера.
-    
-    Собирает:
-    - Общую статистику (обработано, успешно, ошибки)
-    - Статистику по статус-кодам
-    - Статистику по доменам
-    - Временные метрики (скорость, время работы)
-    - Топ доменов
-    """
     
     def __init__(self):
-        """Инициализирует сборщик статистики."""
-        # Временные метрики
+                           
         self.start_time: Optional[float] = None
         self.end_time: Optional[float] = None
         
-        # Счётчики
-        self.total_pages = 0  # Всего обработано страниц
-        self.successful = 0  # Успешных запросов
-        self.failed = 0  # Неудачных запросов
-        self.blocked = 0  # Заблокированных robots.txt
+                  
+        self.total_pages = 0                            
+        self.successful = 0                     
+        self.failed = 0                      
+        self.blocked = 0                              
         
-        # Статистика по статус-кодам
+                                    
         self.status_codes: Dict[int, int] = defaultdict(int)
         
-        # Статистика по доменам
+                               
         self.domain_stats: Dict[str, Dict[str, int]] = defaultdict(lambda: {
             "pages": 0,
             "successful": 0,
             "failed": 0,
         })
         
-        # Временные метрики для каждой страницы
-        self.page_times: List[float] = []  # Время обработки каждой страницы
+                                               
+        self.page_times: List[float] = []                                   
         
-        # Ошибки
-        self.errors: List[Dict[str, str]] = []  # Список ошибок с URL и типом
+                
+        self.errors: List[Dict[str, str]] = []                               
     
     def start(self) -> None:
-        """Начинает отсчёт времени работы краулера."""
         self.start_time = time.time()
         logger.info("Crawler stats started")
     
     def stop(self) -> None:
-        """Останавливает отсчёт времени работы краулера."""
         self.end_time = time.time()
         logger.info("Crawler stats stopped")
     
     def add_page(self, url: str, status: str, page_time: float, error: Optional[str] = None) -> None:
-        """
-        Добавляет информацию об обработанной странице.
-        
-        Args:
-            url: URL страницы
-            status: Статус обработки ("success", "failed", "blocked")
-            page_time: Время обработки страницы в секундах
-            error: Сообщение об ошибке (если есть)
-        """
         self.total_pages += 1
         self.page_times.append(page_time)
         
-        # Извлекаем домен из URL
+                                
         try:
             domain = urlparse(url).netloc
             if ':' in domain:
@@ -91,10 +58,10 @@ class CrawlerStats:
         except Exception:
             domain = "unknown"
         
-        # Обновляем статистику по домену
+                                        
         self.domain_stats[domain]["pages"] += 1
         
-        # Обновляем общую статистику
+                                    
         if status == "success":
             self.successful += 1
             self.domain_stats[domain]["successful"] += 1
@@ -107,44 +74,23 @@ class CrawlerStats:
             self.blocked += 1
     
     def add_status_code(self, status_code: int) -> None:
-        """
-        Добавляет статус-код HTTP ответа.
-        
-        Args:
-            status_code: HTTP статус-код (200, 404, 500 и т.д.)
-        """
         self.status_codes[status_code] += 1
     
     def get_stats(self) -> Dict:
-        """
-        Возвращает полную статистику краулера.
-        
-        Returns:
-            Словарь со всей статистикой:
-            - total_pages: общее количество страниц
-            - successful: успешных
-            - failed: неудачных
-            - blocked: заблокированных
-            - status_codes: распределение по статус-кодам
-            - domains: статистика по доменам
-            - top_domains: топ доменов
-            - performance: метрики производительности
-            - errors_count: количество ошибок
-        """
         elapsed_time = (self.end_time or time.time()) - (self.start_time or time.time())
         
-        # Вычисляем среднюю скорость
+                                    
         avg_speed = self.total_pages / elapsed_time if elapsed_time > 0 else 0
         
-        # Вычисляем среднее время обработки страницы
+                                                    
         avg_page_time = sum(self.page_times) / len(self.page_times) if self.page_times else 0
         
-        # Топ доменов по количеству страниц
+                                           
         top_domains = sorted(
             self.domain_stats.items(),
             key=lambda x: x[1]["pages"],
             reverse=True
-        )[:10]  # Топ 10
+        )[:10]          
         
         return {
             "total_pages": self.total_pages,
@@ -159,27 +105,21 @@ class CrawlerStats:
             ],
             "performance": {
                 "elapsed_time": elapsed_time,
-                "avg_speed": avg_speed,  # страниц в секунду
-                "avg_page_time": avg_page_time,  # секунд на страницу
+                "avg_speed": avg_speed,                     
+                "avg_page_time": avg_page_time,                      
                 "total_time": sum(self.page_times),
             },
             "errors_count": len(self.errors),
         }
     
     def export_to_json(self, filename: str) -> None:
-        """
-        Экспортирует статистику в JSON файл.
-        
-        Args:
-            filename: Путь к файлу для сохранения
-        """
         stats = self.get_stats()
         
-        # Добавляем метаданные
+                              
         export_data = {
             "exported_at": datetime.now().isoformat(),
             "stats": stats,
-            "errors": self.errors[:100],  # Первые 100 ошибок (чтобы не перегружать файл)
+            "errors": self.errors[:100],                                                 
         }
         
         try:
@@ -190,15 +130,9 @@ class CrawlerStats:
             logger.error(f"Error exporting stats to JSON: {e}", exc_info=True)
     
     def export_to_html_report(self, filename: str) -> None:
-        """
-        Создаёт HTML отчёт со статистикой и визуализацией.
-        
-        Args:
-            filename: Путь к HTML файлу
-        """
         stats = self.get_stats()
         
-        # Формируем HTML
+                        
         html = f"""<!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -351,7 +285,7 @@ class CrawlerStats:
             </tr>
 """
         
-        # Добавляем строки для статус-кодов
+                                           
         total_with_status = sum(stats['status_codes'].values())
         for status_code, count in sorted(stats['status_codes'].items()):
             percentage = (count / total_with_status * 100) if total_with_status > 0 else 0
@@ -380,7 +314,7 @@ class CrawlerStats:
             </tr>
 """
         
-        # Добавляем топ доменов
+                               
         for domain_info in stats['top_domains']:
             html += f"""
             <tr>
@@ -404,7 +338,7 @@ class CrawlerStats:
             </tr>
 """
         
-        # Добавляем первые 50 ошибок
+                                    
         for error in self.errors[:50]:
             html += f"""
             <tr>

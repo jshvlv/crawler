@@ -1,13 +1,3 @@
-"""
-Тесты для Дня 6: Сохранение данных в файлы и базы данных.
-
-Проверяет:
-- Сохранение в JSON (JSONL формат)
-- Сохранение в CSV
-- Сохранение в SQLite
-- Обработку ошибок сохранения
-- Целостность сохранённых данных
-"""
 import asyncio
 import json
 import os
@@ -18,24 +8,16 @@ from crawler.storage import JSONStorage, CSVStorage, SQLiteStorage
 
 
 async def test_json_storage():
-    """
-    Тест: JSONStorage корректно сохраняет данные в JSON Lines формат.
-    
-    Проверяет:
-    - Асинхронную запись
-    - Буферизацию
-    - Формат JSONL (каждая строка - отдельный JSON)
-    """
     print("\n=== Test: JSON Storage ===")
     
     test_file = "test_output.json"
-    # Удаляем файл если существует
+                                  
     if os.path.exists(test_file):
         os.remove(test_file)
     
     storage = JSONStorage(test_file, buffer_size=3)
     
-    # Сохраняем несколько записей
+                                 
     test_data = [
         {
             "url": "https://example.com/page1",
@@ -58,37 +40,29 @@ async def test_json_storage():
     for data in test_data:
         await storage.save(data)
     
-    # Закрываем storage (это записывает буфер)
+                                              
     await storage.close()
     
-    # Проверяем, что файл создан
+                                
     assert os.path.exists(test_file), "JSON file should be created"
     
-    # Читаем и проверяем содержимое
+                                   
     with open(test_file, "r", encoding="utf-8") as f:
         lines = f.readlines()
         assert len(lines) == 2, f"Should have 2 lines, got {len(lines)}"
         
-        # Проверяем, что каждая строка - валидный JSON
+                                                      
         for i, line in enumerate(lines):
             data = json.loads(line.strip())
             assert data["url"] == test_data[i]["url"], f"URL should match for line {i}"
             assert data["title"] == test_data[i]["title"], f"Title should match for line {i}"
     
-    # Очищаем
+             
     os.remove(test_file)
     print("PASS: JSON storage works correctly")
 
 
 async def test_csv_storage():
-    """
-    Тест: CSVStorage корректно сохраняет данные в CSV формат.
-    
-    Проверяет:
-    - Автоматическое определение заголовков
-    - Экранирование специальных символов
-    - Асинхронную запись
-    """
     print("\n=== Test: CSV Storage ===")
     
     test_file = "test_output.csv"
@@ -100,22 +74,22 @@ async def test_csv_storage():
     test_data = {
         "url": "https://example.com/page1",
         "title": "Page 1",
-        "text": "Content, with comma",  # Проверяем экранирование запятой
-        "links": '["https://example.com/link1"]',  # JSON строка
+        "text": "Content, with comma",                                   
+        "links": '["https://example.com/link1"]',               
         "status_code": 200,
     }
     
     await storage.save(test_data)
     await storage.close()
     
-    # Проверяем файл
+                    
     assert os.path.exists(test_file), "CSV file should be created"
     
-    # Читаем CSV
+                
     with open(test_file, "r", encoding="utf-8") as f:
         lines = f.readlines()
         assert len(lines) >= 2, "Should have header and at least one data row"
-        # Проверяем заголовки
+                             
         headers = lines[0].strip().split(",")
         assert "url" in headers, "Should have url header"
         assert "title" in headers, "Should have title header"
@@ -125,15 +99,6 @@ async def test_csv_storage():
 
 
 async def test_sqlite_storage():
-    """
-    Тест: SQLiteStorage корректно сохраняет данные в базу данных.
-    
-    Проверяет:
-    - Создание таблиц и индексов
-    - Batch-вставку данных
-    - Чтение данных из БД
-    - Статистику
-    """
     print("\n=== Test: SQLite Storage ===")
     
     test_db = "test_output.db"
@@ -142,10 +107,10 @@ async def test_sqlite_storage():
     
     storage = SQLiteStorage(test_db, batch_size=2)
     
-    # Инициализируем БД
+                       
     await storage.init_db()
     
-    # Сохраняем данные
+                      
     test_data = {
         "url": "https://example.com/page1",
         "title": "Page 1",
@@ -164,10 +129,10 @@ async def test_sqlite_storage():
     await storage.save(test_data)
     await storage.close()
     
-    # Проверяем, что файл создан
+                                
     assert os.path.exists(test_db), "SQLite database should be created"
     
-    # Проверяем данные через прямой SQL запрос
+                                              
     conn = sqlite3.connect(test_db)
     cursor = conn.cursor()
     cursor.execute("SELECT url, title, status_code FROM pages WHERE url = ?", (test_data["url"],))
@@ -178,7 +143,7 @@ async def test_sqlite_storage():
     assert row[1] == test_data["title"], "Title should match"
     assert row[2] == test_data["status_code"], "Status code should match"
     
-    # Проверяем индексы
+                       
     cursor.execute("SELECT name FROM sqlite_master WHERE type='index'")
     indexes = [row[0] for row in cursor.fetchall()]
     assert "idx_url" in indexes, "Should have url index"
@@ -189,15 +154,10 @@ async def test_sqlite_storage():
 
 
 async def test_storage_error_handling():
-    """
-    Тест: Обработка ошибок сохранения не прерывает работу.
-    
-    Проверяет, что ошибки сохранения логируются, но не падают.
-    """
     print("\n=== Test: Storage Error Handling ===")
     
-    # Пытаемся сохранить в невалидный путь (только для демонстрации)
-    # В реальности storage должен обрабатывать ошибки gracefully
+                                                                    
+                                                                
     storage = JSONStorage("/invalid/path/file.json", buffer_size=1)
     
     test_data = {
@@ -205,23 +165,18 @@ async def test_storage_error_handling():
         "title": "Test",
     }
     
-    # Попытка сохранения должна не упасть (ошибка будет залогирована)
+                                                                     
     try:
         await storage.save(test_data)
         await storage.close()
     except Exception:
-        # Ожидаем, что ошибка будет обработана внутри storage
+                                                             
         pass
     
     print("PASS: Storage error handling works (errors are logged, not raised)")
 
 
 async def test_storage_data_integrity():
-    """
-    Тест: Проверка целостности сохранённых данных.
-    
-    Проверяет, что все поля корректно сохраняются и читаются.
-    """
     print("\n=== Test: Data Integrity ===")
     
     test_file = "test_integrity.json"
@@ -230,7 +185,7 @@ async def test_storage_data_integrity():
     
     storage = JSONStorage(test_file, buffer_size=1)
     
-    # Создаём полный набор данных
+                                 
     full_data = {
         "url": "https://example.com/full",
         "title": "Full Page",
@@ -249,11 +204,11 @@ async def test_storage_data_integrity():
     await storage.save(full_data)
     await storage.close()
     
-    # Читаем и проверяем
+                        
     with open(test_file, "r", encoding="utf-8") as f:
         loaded = json.loads(f.read().strip())
         
-        # Проверяем все поля
+                            
         assert loaded["url"] == full_data["url"]
         assert loaded["title"] == full_data["title"]
         assert loaded["text"] == full_data["text"]
@@ -266,9 +221,6 @@ async def test_storage_data_integrity():
 
 
 async def test_sqlite_stats():
-    """
-    Тест: SQLiteStorage корректно возвращает статистику.
-    """
     print("\n=== Test: SQLite Stats ===")
     
     test_db = "test_stats.db"
@@ -278,7 +230,7 @@ async def test_sqlite_stats():
     storage = SQLiteStorage(test_db, batch_size=1)
     await storage.init_db()
     
-    # Сохраняем несколько записей с разными статусами
+                                                     
     for i, status in enumerate([200, 200, 404, 500]):
         await storage.save({
             "url": f"https://example.com/page{i}",
@@ -297,7 +249,7 @@ async def test_sqlite_stats():
     
     await storage.close()
     
-    # Получаем статистику
+                         
     stats = await storage.get_stats()
     
     assert stats["total"] == 4, f"Should have 4 records, got {stats['total']}"
@@ -310,9 +262,6 @@ async def test_sqlite_stats():
 
 
 async def main():
-    """
-    Запускает все тесты для Дня 6.
-    """
     print("=== Running Day 6 Tests ===")
     
     await test_json_storage()
